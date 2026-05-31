@@ -1,0 +1,30 @@
+from enaml.widgets.api import Window, Container, BoxLayout, Label, PushButton, TextEdit
+
+enamldef NewsWindow(Window):
+    title = 'Financial News Monitor'
+    size = (800, 600)
+    
+    Container:
+        layout = BoxLayout(orientation='vertical', spacing=10, margin=10)
+        
+        Label:
+            text = 'Financial News Crawler'
+            style_sheet = 'font-size: 20px; font-weight: bold;'
+            alignment = 'center'
+        
+        Label:
+            text = 'Latest Financial News'
+            style_sheet = 'font-size: 14px;'
+        
+        TextEdit:
+            id = news_display
+            read_only = True
+            plain_text = 'Fetching news...'
+        
+        PushButton:
+            text = 'Refresh News'
+            clicked :: on_refresh_clicked
+
+def on_refresh_clicked():
+    # This will be connected from Python
+    pass
