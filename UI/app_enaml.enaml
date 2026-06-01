@@ -14,6 +14,21 @@ enamldef NewsWindow(Window):
     # Style sheet for custom colors
     StyleSheet:
         Style:
+            element = 'QWidget'
+            Setter:
+                field = 'style_sheet'
+                value = 'background-color: red;'
+
+            element = 'Container'
+            Setter:
+                field = 'style_sheet'
+                value = 'background-color: red;'
+
+            element = 'ScrollArea'
+            Setter:
+                field = 'style_sheet'
+                value = 'background-color: red;'
+
             element = 'Label'
             Setter:
                 field = 'color'
@@ -23,18 +38,6 @@ enamldef NewsWindow(Window):
         # Header
         Label:
             text = '📈 Live Financial News Monitor'
-        
-        # Control panel
-        Container:
-            PushButton:
-                text = '▶ Start Monitoring'
-                clicked :: start_monitoring
-            PushButton:
-                text = '⏹ Stop Monitoring'
-                clicked :: stop_monitoring
-            PushButton:
-                text = '🗑 Clear All'
-                clicked :: clear_news
         
         # Scrollable news area
         ScrollArea:
@@ -56,10 +59,6 @@ enamldef NewsWindow(Window):
                         # News content
                         Label:
                             text << loop_item.content
-                        
-                        # Divider
-                        Label:
-                            text = '─────────────────────'
         
         # Status bar
         Label:
