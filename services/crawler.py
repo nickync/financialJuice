@@ -1,5 +1,8 @@
 import requests
-from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
 from typing import List
 from model.NewsItem import NewsItem
@@ -7,10 +10,11 @@ from model.NewsItem import NewsItem
 class Crawler:
     def __init__(self, url: str = "https://financialjuice.com"):
         self.base_url = url
-        self.session = requests.Session()
-        self.session.headers.update({
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-        })
+        self.driver = None
+
+    def _get_driver(self):
+        if self.driver is None:
+            options = Options()
 
     def fetch_news(self) -> List[NewsItem]:
         try:
