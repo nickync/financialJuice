@@ -3,9 +3,15 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 from datetime import datetime
 from typing import List
 from model.NewsItem import NewsItem
+import time
+import logging as log
+
 
 class Crawler:
     def __init__(self, url: str = "https://financialjuice.com"):
@@ -15,71 +21,128 @@ class Crawler:
     def _get_driver(self):
         if self.driver is None:
             options = Options()
+            
+            #options.add_argument("--headless")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-gpu")
+            options.add_argument("--disable-dev-shm-usage")
+            #options.add_argument("--disable-blink-features=AutomationControlled")
+            #options.add_argument("--disable-extensions")
+            #options.add_argument('user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36')
 
-    def fetch_news(self) -> List[NewsItem]:
-        try:
-            response = self.session.get(self.base_url, timeout=10)
-            response.raise_for_status()
-            return self.parse_news(response.text)
-        except requests.RequestException as e:
-            print(f"Error fetching news: {e}")
-            return []
-        
-    def parse_news(self, html: str) -> List[NewsItem]:
-        soup = BeautifulSoup(html, 'html.parser')
+            #options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            #options.add_experimental_option('useAutomationExtension', False)
+
+            options.add_argument(r"--user-data-dir=/Users/zen/Library/Application Support/Google/Chrome/Profile 2")
+            #options.add_argument(r"--profile-directory=Profile 2")
+
+            service = Service(ChromeDriverManager().install())
+            #service = Service("/usr/local/bin/chromedriver")  # Update this path to your chromedriver
+            log.info("Initializing Selenium WebDriver with ChromeDriverManager.")
+            self.driver = webdriver.Chrome(service=service, options=options)
+
+            log.info("Selenium WebDriver initialized successfully before execute script.")
+
+            self.driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
+
+            log.info("Initialized Selenium WebDriver with anti-detection measures.")
+            # self.driver.execute_script("""
+            #                            Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
+            #                            Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});
+            #                            """)
+        return self.driver
+    
+    def _scroll_and_load(self, driver, scroll_pause: float = 2):
+        last_height = driver.execute_script("return document.body.scrollHeight")
+        while True:
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(scroll_pause)
+            new_height = driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break
+            last_height = new_height
+
+    def fetch_news(self, max_scrolls: int = 2) -> List[NewsItem]:
+        log.info(f"Starting news fetch from {self.base_url}")
+        driver = self._get_driver()
         news_items = []
-        
-        articles = soup.select('div.news-item')
-        for article in articles[:20]:
-            try:
-                title = self.extract_title(article)
-                content = self.extract_content(article)
-                time = self.extract_time(article)
-                importance = self.extract_importance(article)
-                category = self.extract_category(article)
-                source = self.extract_source(article)
-                news_item = NewsItem(title=title, content=content, time=time, importance=importance, category=category, source=source)
-                news_items.append(news_item)
-            except Exception as e:
-                print(f"Error parsing article: {e}")
-                continue
+
+        try:
+            log.info(f"Navigating to {self.base_url}")
+            driver.get(self.base_url)
+            time.sleep(3)
+
+            for _ in range(max_scrolls):
+                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                time.sleep(5)
+
+            log.info("Finished scrolling to load dynamic content.")
+
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.TAG_NAME, "body"))
+            )
+            html = driver.page_source
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(html, "html.parser")
+
+            articles = self._find_articles(soup)
+
+            for article in articles:
+                title = self._extract_title(article)
+                content = self._extract_content(article)
+                source = self._extract_source(article)
+                category = self._extract_category(article)
+                timestamp = self._extract_timestamp(article)
+                link = self._extract_link(article)
+
+                if title:
+                    news_items.append(NewsItem(
+                        title=title,
+                        content=content,
+                        source=source,
+                        category=category,
+                        time=timestamp,
+                        link=link
+                    ))
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
         return news_items
     
-    def _extract_title(self, article) -> str:
-        title_elem = article.select_one('h1, h2, h3, .title, .headline')
-        return title_elem.text.strip() if title_elem else ""
+    def _find_articles(self, soup):
+        return soup.find_all("div", class_="news-general")
     
-    def _extract_content(self, article) -> str:
-        content_elem = article.select_one('p, .content, .description, .summary')
-        return content_elem.text.strip()[:200] if content_elem else ""
+    def _extract_title(self, article):
+        title_tag = article.find("span", class_="headline-title-nolink")
+        return title_tag.get_text(strip=True) if title_tag else ""
     
-    def _extract_time(self, article) -> int:
-        time_elem = article.select_one('time, .date, .timestamp')
-        if time_elem and time_elem.has_attr('datetime'):
-            dt = datetime.fromisoformat(time_elem['datetime'])
-            return int(dt.timestamp())
-        elif time_elem:
-            try:
-                dt = datetime.strptime(time_elem.text.strip(), "%Y-%m-%d %H:%M:%S")
-                return int(dt.timestamp())
-            except ValueError:
-                pass
-        return int(datetime.now().timestamp())
+    def _extract_content(self, article):
+        content_tag = article.find("p", class_="news-content")
+        return content_tag.get_text(strip=True) if content_tag else ""
     
-    def _extract_importance(self, article) -> int:
-        importance_elem = article.select_one('.importance, .priority')
-        if importance_elem:
-            try:
-                return int(importance_elem.text.strip())
-            except ValueError:
-                pass
-        return 3
+    def  _extract_source(self, article):
+        source_tag = article.find("span", class_="news-source")
+        return source_tag.get_text(strip=True) if source_tag else ""
     
-    def _extract_category(self, article) -> str:
-        category_elem = article.select_one('.category, .tag')
-        return category_elem.text.strip() if category_elem else "General"
-    
-    def _extract_source(self, article) -> str:
-        source_elem = article.select_one('.source, .author')
-        return source_elem.text.strip() if source_elem else "Unknown"
+    def _extract_category(self, article):
+        categorys = article.find("span", class_="news-label")
 
+        return " ".join([c.get_text(strip=True) for c in categorys]) if categorys else ""
+    
+    def _extract_timestamp(self, article):
+        time_tag = article.find("p", class_="time")
+        if time_tag:
+            time_str = time_tag.get_text(strip=True)
+            return time_str
+        
+        return int(time.time())
+    
+    def _extract_link(self, article):
+        link_tag = article.find("a", class_="news-link")
+        return link_tag["href"] if link_tag and "href" in link_tag.attrs else ""
+    
+    def close(self):
+        if self.driver:
+            self.driver.quit()
+            self.driver = None

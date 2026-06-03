@@ -3,6 +3,8 @@ import time
 from typing import List
 from model.NewsItem import NewsItem
 from services.crawler import Crawler
+import logging as log
+import enaml.application
 
 
 class NewsController:
@@ -25,6 +27,7 @@ class NewsController:
     def _fetch_loop(self):
         while self.running:
             try:
+                log.info("Starting news fetch loop.")
                 new_articles = self.crawler.fetch_news()
 
                 new_count = 0
@@ -36,7 +39,7 @@ class NewsController:
                 
                 if new_count > 0:
                     print(f"Fetched {new_count} new articles")
-                    self.window.news_items = self.news_items
+                    print(self.news_items)
                     self.update_ui()
             
                 time.sleep(self.fetch_interval)
@@ -49,9 +52,10 @@ class NewsController:
         from enaml.qt.qt_application import QtApplication
 
         def update():
-            self.window.news_items = self.news_items
+            self.window.news_items = [article for article in self.news_items]
+            
         
-        QtApplication.instance().defer(update)
+        enaml.application.deferred_call(update)
 
     def stop(self):
         self.running = False

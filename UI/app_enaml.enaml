@@ -54,7 +54,7 @@ enamldef NewsWindow(Window):
                         
                         # News header with timestamp
                         Label:
-                            text << f"[{loop_item.time}] {loop_item.source}"
+                            text << loop_item.title
                         
                         # News content
                         Label:
