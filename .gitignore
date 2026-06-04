@@ -5,6 +5,7 @@ build/
 dist/
 wheels/
 *.egg-info
+chrome_profile/
 
 # Virtual environments
 .venv
