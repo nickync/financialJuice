@@ -6,6 +6,7 @@ dist/
 wheels/
 *.egg-info
 chrome_profile/
+selenium_profile/
 
 # Virtual environments
 .venv

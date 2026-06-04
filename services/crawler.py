@@ -74,7 +74,7 @@ class Crawler:
                 break
             last_height = new_height
 
-    def fetch_news(self, max_scrolls: int = 2) -> List[NewsItem]:
+    def fetch_news(self, max_scrolls: int = 2, initial_load = False) -> List[NewsItem]:
         log.info(f"Starting news fetch from {self.base_url}")
         driver = self._get_driver()
         news_items = []
@@ -83,10 +83,10 @@ class Crawler:
             log.info(f"Navigating to {self.base_url}")
             driver.get(self.base_url)
             time.sleep(3)
-
-            for _ in range(max_scrolls):
-                driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-                time.sleep(5)
+            if initial_load:
+                for _ in range(max_scrolls):
+                    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                    time.sleep(5)
 
             log.info("Finished scrolling to load dynamic content.")
 
@@ -123,7 +123,7 @@ class Crawler:
         return news_items
     
     def _find_articles(self, soup):
-        return soup.find_all("div", class_="news-general")
+        return soup.find_all("div", class_="media feedWrap")
     
     def _extract_title(self, article):
         title_tag = article.find("span", class_="headline-title-nolink")
