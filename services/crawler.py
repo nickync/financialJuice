@@ -11,6 +11,9 @@ from typing import List
 from model.NewsItem import NewsItem
 import time
 import logging as log
+import os
+import tempfile
+import platform
 
 
 class Crawler:
@@ -33,7 +36,16 @@ class Crawler:
             #options.add_experimental_option("excludeSwitches", ["enable-automation"])
             #options.add_experimental_option('useAutomationExtension', False)
 
-            options.add_argument(r"--user-data-dir=/Users/zen/Library/Application Support/Google/Chrome/Profile 2")
+            if platform.system() == "Windows":
+                profile_path = os.path.join(os.getcwd(), "chrome_profile")
+            else:
+                profile_path = tempfile.mkdtemp(prefix="chrome_")
+
+            #clean_dir = '/Users/zen/Library/Application Support/Google/Chrome/Profile 2'  # Update this to a clean profile path if needed
+
+            os.makedirs(profile_path, exist_ok=True)
+
+            options.add_argument(f"--user-data-dir={profile_path}")
             #options.add_argument(r"--profile-directory=Profile 2")
 
             service = Service(ChromeDriverManager().install())

@@ -12,15 +12,25 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import tempfile
 
+import platform
+
 print("=== Debug Test ===")
 
 # Simulate your crawler's approach
 options = Options()
 
 # Use a clean temporary profile
-clean_dir = '/Users/zen/Library/Application Support/Google/Chrome/Profile 2'  # Update this to a clean profile path if needed
-print(f"Profile dir: {clean_dir}")
-options.add_argument(f"--user-data-dir={clean_dir}")
+if platform.system() == "Windows":
+    profile_path = os.path.join(os.getcwd(), "chrome_profile")
+else:
+    profile_path = tempfile.mkdtemp(prefix="chrome_")
+
+#clean_dir = '/Users/zen/Library/Application Support/Google/Chrome/Profile 2'  # Update this to a clean profile path if needed
+
+os.makedirs(profile_path, exist_ok=True)
+
+print(f"Profile dir: {profile_path}")
+options.add_argument(f"--user-data-dir={profile_path}")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 
