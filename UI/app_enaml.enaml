@@ -3,6 +3,7 @@ from enaml.layout.api import vbox, hbox
 from enaml.core.api import Looper
 from atom.api import List, Str
 from enaml.styling import StyleSheet, Setter, Style
+from HeadlineField import HeadlineField
 
 enamldef NewsWindow(Window):
     # Reactive data model
@@ -14,25 +15,15 @@ enamldef NewsWindow(Window):
     # Style sheet for custom colors
     StyleSheet:
         Style:
-            element = 'QWidget'
-            Setter:
-                field = 'style_sheet'
-                value = 'background-color: red;'
-
-            element = 'Container'
-            Setter:
-                field = 'style_sheet'
-                value = 'background-color: red;'
-
-            element = 'ScrollArea'
-            Setter:
-                field = 'style_sheet'
-                value = 'background-color: red;'
-
-            element = 'Label'
+            style_class = 'headline'
             Setter:
                 field = 'color'
-                value = '#109d20'
+                value = '#969ca0'
+        Style:
+            style_class = 'body'
+            Setter:
+                field = 'color'
+                value = '#2255a1'
     
     Container:        
         # Header
@@ -53,12 +44,15 @@ enamldef NewsWindow(Window):
                     Container:
                         
                         # News header with timestamp
-                        Label:
+                        HeadlineField:
                             text << loop_item.title
+                            style_class = 'headline'
                         
                         # News content
-                        Label:
+                        HeadlineField:
                             text << loop_item.content
+                            style_class = 'body'
+
         
         # Status bar
         Label:

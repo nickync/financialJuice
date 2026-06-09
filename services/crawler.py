@@ -123,14 +123,15 @@ class Crawler:
         return news_items
     
     def _find_articles(self, soup):
-        return soup.find_all("div", class_="media feedWrap")
+        return soup.find_all("div", class_="headline-item")
     
     def _extract_title(self, article):
         title_tag = article.find("span", class_="headline-title-nolink")
         return title_tag.get_text(strip=True) if title_tag else ""
     
     def _extract_content(self, article):
-        content_tag = article.find("p", class_="news-content")
+        #content = article.find("div", class_="summary-item")
+        content_tag = article.find("div", class_="headline-content-container") if article else None
         return content_tag.get_text(strip=True) if content_tag else ""
     
     def  _extract_source(self, article):

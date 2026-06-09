@@ -29,16 +29,21 @@ class NewsController:
         while self.running:
             try:
                 log.info("Starting news fetch loop.")
+                INITIAL_LOAD = not self.news_items
                 if not self.window.news_items:
-                    new_articles = self.crawler.fetch_news(0, initial_load=True)
+                    new_articles = self.crawler.fetch_news(0, initial_load=INITIAL_LOAD)
                 else:
                     new_articles = self.crawler.fetch_news(0)
 
                 new_count = 0
 
                 for article in new_articles:
-                    if article.title not in self.titles:
+                    if INITIAL_LOAD:
                         self.news_items.append(article)
+                        self.titles.add(article.title)
+                        new_count += 1
+                    elif article.title not in self.titles:
+                        self.news_items.insert(0, article)
                         self.titles.add(article.title)
                         new_count += 1
                 
