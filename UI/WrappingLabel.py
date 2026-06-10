@@ -47,6 +47,7 @@ class WrappingLabel(RawWidget):
         label = QLabel(parent)
         label.setWordWrap(self.word_wrap)  # Enable text wrapping [citation:3]
         label.setText(self.text)
+        label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         return label
     
     def _update_text(self, change):

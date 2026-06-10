@@ -1,4 +1,4 @@
-from enaml.widgets.api import Window, Container, ScrollArea, MultilineField, PushButton, Label
+from enaml.widgets.api import Window, Container, ScrollArea, VGroup, PushButton, Label
 from enaml.layout.api import vbox, hbox
 from enaml.core.api import Looper
 from atom.api import List, Str
@@ -25,23 +25,28 @@ enamldef NewsWindow(Window):
                 field = 'color'
                 value = '#2255a1'
     
-    Container:        
+    VGroup:        
         # Header
         Label:
             text = '📈 Live Financial News Monitor'
         
+        WrappingLabel:
+            text = "TEST: This should be left aligned"
+            word_wrap = True
+            #style_class = 'headline'  # Keep style to test if it affects
+
         # Scrollable news area
         ScrollArea:
             vertical_policy = 'as_needed'
             horizontal_policy = 'always_off'
             
-            Container:
+            VGroup:
                 
                 # Dynamically create news items using Looper
                 Looper:
                     iterable := news_items
                     
-                    Container:
+                    VGroup:
                         
                         # News header with timestamp
                         WrappingLabel:

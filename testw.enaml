@@ -1,0 +1,33 @@
+# minimal_test.enaml
+from enaml.widgets.api import Window, Container, ScrollArea, VGroup
+from ui.WrappingLabel import WrappingLabel
+
+enamldef TestWindow(Window):
+    title = 'WrappingLabel Alignment Test'
+    initial_size = (500, 400)
+    
+    Container:
+        ScrollArea:
+            vertical_policy = 'as_needed'
+            horizontal_policy = 'always_off'
+            
+            VGroup:
+                WrappingLabel:
+                    text = "1. Short text - should be left aligned"
+                    word_wrap = True
+                
+                WrappingLabel:
+                    text = "2. " + ("Medium text that wraps " * 5)
+                    word_wrap = True
+                
+                WrappingLabel:
+                    text = "3. " + ("Very asdf sd fasfd asddf sdaf long text that demonstrates wrapping behavior " * 10)
+                    
+                
+                WrappingLabel:
+                    text = "4. Another short line"
+                    word_wrap = True
+                
+                WrappingLabel:
+                    text = "5. Test with numbers: 1234567890" * 3
+                    word_wrap = True
