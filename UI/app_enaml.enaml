@@ -3,7 +3,7 @@ from enaml.layout.api import vbox, hbox
 from enaml.core.api import Looper
 from atom.api import List, Str
 from enaml.styling import StyleSheet, Setter, Style
-from HeadlineField import HeadlineField
+from ui.WrappingLabel import WrappingLabel
 
 enamldef NewsWindow(Window):
     # Reactive data model
@@ -33,7 +33,7 @@ enamldef NewsWindow(Window):
         # Scrollable news area
         ScrollArea:
             vertical_policy = 'as_needed'
-            horizontal_policy = 'as_needed'
+            horizontal_policy = 'always_off'
             
             Container:
                 
@@ -44,14 +44,11 @@ enamldef NewsWindow(Window):
                     Container:
                         
                         # News header with timestamp
-                        HeadlineField:
-                            text << loop_item.title
+                        WrappingLabel:
+                            text << loop_item.to_text()
                             style_class = 'headline'
                         
-                        # News content
-                        HeadlineField:
-                            text << loop_item.content
-                            style_class = 'body'
+
 
         
         # Status bar
