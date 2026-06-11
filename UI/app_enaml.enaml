@@ -29,16 +29,11 @@ enamldef NewsWindow(Window):
         # Header
         Label:
             text = '📈 Live Financial News Monitor'
-        
-        WrappingLabel:
-            text = "TEST: This should be left aligned"
-            word_wrap = True
-            #style_class = 'headline'  # Keep style to test if it affects
 
         # Scrollable news area
         ScrollArea:
             vertical_policy = 'as_needed'
-            horizontal_policy = 'always_off'
+            horizontal_policy = 'as_needed'
             
             VGroup:
                 
@@ -50,6 +45,7 @@ enamldef NewsWindow(Window):
                         
                         # News header with timestamp
                         WrappingLabel:
+                            hug_width = 'weak'
                             text << loop_item.to_text()
                             style_class = 'headline'
                         
