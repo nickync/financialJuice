@@ -8,7 +8,7 @@ import enaml.application
 
 
 class NewsController:
-    def __init__(self, window, fetch_interval: int = 5):
+    def __init__(self, window, fetch_interval: int = 10):
         self.crawler = Crawler()
         self.window = window
         self.fetch_interval = fetch_interval
@@ -31,7 +31,7 @@ class NewsController:
                 log.info("Starting news fetch loop.")
                 INITIAL_LOAD = not self.news_items
                 if not self.window.news_items:
-                    new_articles = self.crawler.fetch_news(4, initial_load=INITIAL_LOAD)
+                    new_articles = self.crawler.fetch_news(2, initial_load=INITIAL_LOAD)
                 else:
                     new_articles = self.crawler.fetch_news(0)
 

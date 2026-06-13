@@ -17,6 +17,11 @@ enamldef NewsItem(VGroup):
                 field = 'color'
                 value = '#eba626'
         Style:
+            style_class = 'critical'
+            Setter:
+                field = 'color'
+                value = 'red'
+        Style:
             style_class = 'source'
             Setter:
                 field = 'color'
@@ -24,12 +29,17 @@ enamldef NewsItem(VGroup):
             Setter:
                 field = 'background-color'
                 value = '#e1e374'
+        Style:
+            style_class = 'italic'
+            Setter:
+                field = 'font'
+                value = 'italic'
 
     Conditional:
         condition << bool(news_item.title)
         WrappingLabel:
             text << news_item.title
-            style_class = 'bbg'
+            style_class = 'critical' if news_item.critical else 'bbg'
 
     Conditional:
         condition << bool(news_item.to_text())
@@ -37,7 +47,6 @@ enamldef NewsItem(VGroup):
             text << news_item.to_text()
 
     HGroup:
-        spacing = 0
 
         Conditional:
             condition << bool(news_item.source)
@@ -50,13 +59,16 @@ enamldef NewsItem(VGroup):
             Looper:
                 iterable := news_item.category
                 Label:
-                    text = loop_item
+                    text << loop_item
+                    align = 'center'
                     style_class = 'source'
 
         Conditional:
             condition << bool(news_item.time)
-            WrappingLabel:
+            Label:
                 text << news_item.time
+                style_class = 'italic'
+        
 
     Conditional:
         condition << bool(news_item.link)

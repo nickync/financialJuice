@@ -36,20 +36,15 @@ class Crawler:
             #options.add_experimental_option("excludeSwitches", ["enable-automation"])
             #options.add_experimental_option('useAutomationExtension', False)
 
-            if platform.system() == "Windows":
-                profile_path = os.path.join(os.getcwd(), "chrome_profile")
-            else:
-                profile_path = tempfile.mkdtemp(prefix="chrome_")
 
-            #clean_dir = '/Users/zen/Library/Application Support/Google/Chrome/Profile 2'  # Update this to a clean profile path if needed
+            profile_path = os.path.join(os.getcwd(), "chrome_profile")
 
             os.makedirs(profile_path, exist_ok=True)
 
             options.add_argument(f"--user-data-dir={profile_path}")
-            #options.add_argument(r"--profile-directory=Profile 2")
 
             service = Service(ChromeDriverManager().install())
-            #service = Service("/usr/local/bin/chromedriver")  # Update this path to your chromedriver
+
             log.info("Initializing Selenium WebDriver with ChromeDriverManager.")
             self.driver = webdriver.Chrome(service=service, options=options)
 
@@ -109,7 +104,7 @@ class Crawler:
                 category = self._extract_category(article)
                 timestamp = self._extract_timestamp(article)
                 link = self._extract_link(article)
-                print(f"Extracted article: {title} - content: {content} - {category} - {timestamp}")
+                critical = self._is_critical(article)
                 if title:
                     news_items.append(NewsItem(
                         title=title,
@@ -117,7 +112,8 @@ class Crawler:
                         source=source,
                         category=category,
                         time=timestamp,
-                        link=link
+                        link=link,
+                        critical=critical
                     ))
 
         except Exception as e:
@@ -130,7 +126,10 @@ class Crawler:
     
     def _extract_title(self, article):
         title_tag = article.find("p", class_="headline-title")
-        return title_tag.get_text(strip=True) if title_tag else ""
+        if title_tag:
+            title_text = title_tag.get_text(strip=True)
+            return title_text if title_text != 'Join us and Go Real-time' else ""
+        return ""
     
     def _extract_content(self, article):
         #content = article.find("div", class_="summary-item")
@@ -155,7 +154,7 @@ class Crawler:
     def _extract_category(self, article):
         categories = article.find_all("span", class_="news-label")
 
-        return " ".join([c.get_text(strip=True) for c in categories]) if categories else ""
+        return [c.get_text(strip=True) for c in categories] if categories else []
     
     def _extract_timestamp(self, article):
         time_tag = article.find("p", class_="time")
@@ -168,6 +167,10 @@ class Crawler:
     def _extract_link(self, article):
         link_tag = article.find("a", class_="news-link")
         return link_tag["href"] if link_tag and "href" in link_tag.attrs else ""
+
+    def _is_critical(self, article):
+        critical_tag = article.find("div", class_="active-critical")
+        return critical_tag is not None
     
     def close(self):
         if self.driver:
