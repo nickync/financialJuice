@@ -31,7 +31,7 @@ class NewsController:
                 log.info("Starting news fetch loop.")
                 INITIAL_LOAD = not self.news_items
                 if not self.window.news_items:
-                    new_articles = self.crawler.fetch_news(0, initial_load=INITIAL_LOAD)
+                    new_articles = self.crawler.fetch_news(4, initial_load=INITIAL_LOAD)
                 else:
                     new_articles = self.crawler.fetch_news(0)
 
@@ -49,7 +49,6 @@ class NewsController:
                 
                 if new_count > 0:
                     print(f"Fetched {new_count} new articles")
-                    print(self.news_items)
                     self.update_ui()
             
                 time.sleep(self.fetch_interval)
@@ -63,7 +62,6 @@ class NewsController:
 
         def update():
             self.window.news_items = [article for article in self.news_items]
-            
         
         enaml.application.deferred_call(update)
 

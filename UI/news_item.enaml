@@ -1,0 +1,64 @@
+from enaml.widgets.api import VGroup, Label, Container, HGroup
+from ui.WrappingLabel import WrappingLabel
+from enaml.styling import Setter, StyleSheet, Style
+from enaml.core.api import Conditional, Looper
+from enaml.layout.api import spacer
+
+enamldef NewsItem(VGroup):
+    attr news_item
+    spacing = 0
+    padding = 0
+    leading_spacer = spacer(0)
+    trailing_spacer = spacer(0)
+    StyleSheet:
+        Style:
+            style_class = 'bbg'
+            Setter:
+                field = 'color'
+                value = '#eba626'
+        Style:
+            style_class = 'source'
+            Setter:
+                field = 'color'
+                value = 'green'
+            Setter:
+                field = 'background-color'
+                value = '#e1e374'
+
+    Conditional:
+        condition << bool(news_item.title)
+        WrappingLabel:
+            text << news_item.title
+            style_class = 'bbg'
+
+    Conditional:
+        condition << bool(news_item.to_text())
+        WrappingLabel:
+            text << news_item.to_text()
+
+    HGroup:
+        spacing = 0
+
+        Conditional:
+            condition << bool(news_item.source)
+            WrappingLabel:
+                text << news_item.source
+                
+
+        Conditional:
+            condition << bool(news_item.category)
+            Looper:
+                iterable := news_item.category
+                Label:
+                    text = loop_item
+                    style_class = 'source'
+
+        Conditional:
+            condition << bool(news_item.time)
+            WrappingLabel:
+                text << news_item.time
+
+    Conditional:
+        condition << bool(news_item.link)
+        WrappingLabel:
+            text << news_item.link

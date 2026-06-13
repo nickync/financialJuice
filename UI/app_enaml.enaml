@@ -4,6 +4,8 @@ from enaml.core.api import Looper
 from atom.api import List, Str
 from enaml.styling import StyleSheet, Setter, Style
 from ui.WrappingLabel import WrappingLabel
+from ui.news_item import NewsItem
+from enaml.layout.api import spacer
 
 enamldef NewsWindow(Window):
     # Reactive data model
@@ -33,23 +35,17 @@ enamldef NewsWindow(Window):
         # Scrollable news area
         ScrollArea:
             vertical_policy = 'as_needed'
-            horizontal_policy = 'as_needed'
+            horizontal_policy = 'always_off'
             
             VGroup:
-                
                 # Dynamically create news items using Looper
                 Looper:
                     iterable := news_items
-                    
-                    VGroup:
+                
+                    NewsItem:
+                        news_item << loop_item
                         
-                        # News header with timestamp
-                        WrappingLabel:
-                            hug_width = 'weak'
-                            text << loop_item.to_text()
-                            style_class = 'headline'
-                        
-
+        #trailing_spacer = spacer(0)
 
         
         # Status bar

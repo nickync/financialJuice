@@ -62,6 +62,9 @@ class Crawler:
             #                            Object.defineProperty(navigator, 'plugins', {get: () => [1, 2, 3, 4, 5]});
             #                            Object.defineProperty(navigator, 'languages', {get: () => ['en-US', 'en']});
             #                            """)
+
+            self.driver.minimize_window()
+
         return self.driver
     
     def _scroll_and_load(self, driver, scroll_pause: float = 2):
@@ -106,7 +109,7 @@ class Crawler:
                 category = self._extract_category(article)
                 timestamp = self._extract_timestamp(article)
                 link = self._extract_link(article)
-
+                print(f"Extracted article: {title} - content: {content} - {category} - {timestamp}")
                 if title:
                     news_items.append(NewsItem(
                         title=title,
@@ -126,22 +129,33 @@ class Crawler:
         return soup.find_all("div", class_="headline-item")
     
     def _extract_title(self, article):
-        title_tag = article.find("span", class_="headline-title-nolink")
+        title_tag = article.find("p", class_="headline-title")
         return title_tag.get_text(strip=True) if title_tag else ""
     
     def _extract_content(self, article):
         #content = article.find("div", class_="summary-item")
-        content_tag = article.find("div", class_="headline-content-container") if article else None
-        return content_tag.get_text(strip=True) if content_tag else ""
+        content_tag = article.find("div", class_="headline-content") if article else None
+
+        if content_tag:
+            # replace br with newlines
+            for br in content_tag.find_all("br"):
+                br.replace_with("**break**")
+
+            # replace li with newlines
+            for li in content_tag.find_all("li"):
+                li.replace_with("**break** -  " +li.get_text(strip=True))
+
+            return content_tag.get_text(strip=True)
+        return ""
     
     def  _extract_source(self, article):
         source_tag = article.find("span", class_="news-source")
         return source_tag.get_text(strip=True) if source_tag else ""
     
     def _extract_category(self, article):
-        categorys = article.find("span", class_="news-label")
+        categories = article.find_all("span", class_="news-label")
 
-        return " ".join([c.get_text(strip=True) for c in categorys]) if categorys else ""
+        return " ".join([c.get_text(strip=True) for c in categories]) if categories else ""
     
     def _extract_timestamp(self, article):
         time_tag = article.find("p", class_="time")

@@ -1,3 +1,5 @@
+from cProfile import label
+
 from atom.api import Str, Bool
 from enaml.widgets.api import RawWidget
 from enaml.core.declarative import d_
@@ -27,6 +29,9 @@ class WrappingLabel(RawWidget):
     # Public attributes
     text = d_(Str())
     word_wrap = d_(Bool(True))
+
+    hug_width = 'weak'
+    hug_height = 'weak'
     
     def create_widget(self, parent):
         """Create the toolkit widget for the control.
@@ -48,6 +53,7 @@ class WrappingLabel(RawWidget):
         label.setWordWrap(self.word_wrap)  # Enable text wrapping [citation:3]
         label.setText(self.text)
         label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        
         return label
     
     def _update_text(self, change):
