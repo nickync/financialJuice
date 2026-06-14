@@ -16,6 +16,8 @@ def main():
 
     news_controller = NewsController(window)
     
+    window.controller = news_controller
+    
     def on_close():
         news_controller.crawler.close()
         news_controller.stop()

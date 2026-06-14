@@ -10,6 +10,7 @@ from enaml.layout.api import spacer
 enamldef NewsWindow(Window):
     # Reactive data model
     attr news_items = []
+    attr controller
     
     title = 'Financial News Monitor'
     initial_size = (700, 600)
@@ -31,6 +32,10 @@ enamldef NewsWindow(Window):
         # Header
         Label:
             text = '📈 Live Financial News Monitor'
+
+        PushButton:
+            text = "Hide Trump's bs"
+            clicked :: controller.filter('trumps truth social posts')
 
         # Scrollable news area
         ScrollArea:

@@ -60,10 +60,19 @@ class NewsController:
     def update_ui(self):
         from enaml.qt.qt_application import QtApplication
 
-        def update():
-            self.window.news_items = [article for article in self.news_items]
+        def update(items):
+            self.window.news_items = [article for article in items]
         
-        enaml.application.deferred_call(update)
+        enaml.application.deferred_call(update, self.news_items)
+
+    def filter(self, keyword: str):
+        if keyword:
+            filtered = [item for item in self.news_items if not 'truth social posts' in item.time.lower()]
+            self.news_items = filtered
+        else:
+            self.news_items = [article for article in self.news_items]
+        
+        self.update_ui()
 
     def stop(self):
         self.running = False
